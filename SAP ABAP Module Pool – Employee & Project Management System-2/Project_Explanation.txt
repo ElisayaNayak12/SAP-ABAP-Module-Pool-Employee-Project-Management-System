@@ -1,0 +1,35 @@
+# SAP ABAP Module Pool – Employee & Project Management System
+
+## Project Level
+Intermediate
+
+## Overview
+This project is an SAP ABAP Module Pool application designed to display employee information along with related project details on a single screen.
+
+## Objectives
+- To learn Module Pool Programming
+- To handle user input validation
+- To implement F4 and F1 help
+- To simulate real-time SAP screen behavior
+
+## Features
+- Mandatory Employee ID field
+- Validation using CHAIN and ENDCHAIN
+- EXIT command for Back navigation
+- F4 Help using F4IF_INT_TABLE_VALUE_REQUEST
+- F1 Help using HELP_OBJECT_SHOW
+- Table Control for project data display
+- Employee–Project relationship handling
+
+## Technical Details
+- Programming Type: Module Pool
+- Screens: 0100
+- Tables Used:
+  - ZEMPLOYEE_TABLE
+  - ZDEPARTMENT_TABL
+
+## Real-Time Usage
+This application structure is commonly used in SAP HR and internal management systems where employee and project data must be accessed quickly using custom screens.
+
+## Conclusion
+This project demonstrates intermediate-level SAP ABAP skills, focusing on screen programming, validations, and user interaction handling.
