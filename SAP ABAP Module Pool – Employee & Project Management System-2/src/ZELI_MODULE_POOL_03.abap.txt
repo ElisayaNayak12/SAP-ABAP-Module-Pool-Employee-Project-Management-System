@@ -1,0 +1,446 @@
+(*&---------------------------------------------------------------------*
+*& Modulpool ZELI_MODULE_POOL_03
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+PROGRAM ZELI_MODULE_POOL_03.
+TABLES : ZEMPLOYEE_TABLE,ZDEPARTMENT_TABL.
+
+TYPES :  BEGIN OF TY_EMP3,
+         EMP_ID	 TYPE ZELI_EMP_ID,
+         EMP_NAME TYPE ZELI_EMP_NAME,
+         DEPARTMENT TYPE ZELI_DEPARTMENT,
+         MANAGER  TYPE ZELI_MANAGER,
+         SALARY TYPE ZELI_SALARY,
+         CURRENCY TYPE ZELI_CURRENCY,
+         END OF TY_EMP3.
+
+TYPES : BEGIN OF TY_DEPT3,
+        EMP_ID TYPE ZELI_EMP_ID,
+        PROJECT_ID TYPE ZELI_PROJECT_ID,
+        PROJECT_NAME TYPE ZELI_PROJECT_NAME,
+        END OF TY_DEPT3.
+
+DATA : IT_EMP3 TYPE TABLE OF TY_EMP3,
+      WA_EMP3 TYPE TY_EMP3.
+
+DATA : IT_DEPT3 TYPE TABLE OF TY_DEPT3,
+      WA_DEPT3 TYPE TY_DEPT3.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE STATUS_0100 OUTPUT.
+ SET PF-STATUS 'EMP3'.
+ SET TITLEBAR 'EMD3'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE USER_COMMAND_0100 INPUT.
+
+ IF SY-UCOMM EQ 'SUBMIT'.
+   SELECT EMP_ID EMP_NAME DEPARTMENT MANAGER
+SALARY CURRENCY  FROM ZEMPLOYEE_TABLE INTO TABLE IT_EMP3 WHERE EMP_ID = ZEMPLOYEE_TABLE-EMP_ID.
+
+     IF IT_EMP3 IS NOT INITIAL.
+       SELECT EMP_ID PROJECT_ID PROJECT_NAME FROM ZDEPARTMENT_TABL INTO TABLE IT_DEPT3 FOR ALL ENTRIES IN IT_EMP3
+         WHERE EMP_ID = IT_EMP3-EMP_ID.
+       ENDIF.
+
+     READ TABLE IT_EMP3 INTO WA_EMP3 WITH KEY EMP_ID = ZEMPLOYEE_TABLE-EMP_ID.
+     IF SY-SUBRC EQ 0.
+       ZEMPLOYEE_TABLE-EMP_NAME = WA_EMP3-EMP_NAME.
+       ZEMPLOYEE_TABLE-DEPARTMENT = WA_EMP3-DEPARTMENT.
+       ZEMPLOYEE_TABLE-MANAGER = WA_EMP3-MANAGER.
+       ZEMPLOYEE_TABLE-SALARY = WA_EMP3-SALARY.
+       ZEMPLOYEE_TABLE-CURRENCY = WA_EMP3-CURRENCY.
+     ENDIF.
+   ENDIF.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  EXIT_COMMAND  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE EXIT_COMMAND INPUT.
+   IF SY-UCOMM EQ 'BACK'.
+   LEAVE TO SCREEN 0.
+   ENDIF.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  VALIDATE  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE VALIDATE INPUT.
+  SELECT EMP_ID EMP_NAME DEPARTMENT MANAGER
+SALARY CURRENCY  FROM ZEMPLOYEE_TABLE INTO TABLE IT_EMP3 WHERE EMP_ID = ZEMPLOYEE_TABLE-EMP_ID.
+ IF  IT_EMP3 IS INITIAL.
+     MESSAGE 'Employee Id is do not exist .Enter Valid Employee Id' TYPE 'E'.
+   ENDIF.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  F4_HEP1  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE F4_HEP1 INPUT.
+  TYPES : BEGIN OF TY_EMPI1,
+         EMP_ID	TYPE ZELI_EMP_ID,
+         EMP_NAME	TYPE ZELI_EMP_NAME,
+         END OF TY_EMPI1.
+
+  DATA : IT_EMPI1 TYPE TABLE OF TY_EMPI1.
+
+       SELECT EMP_ID EMP_NAME FROM ZEMPLOYEE_TABLE INTO TABLE IT_EMPI1.
+         CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
+           EXPORTING
+*            DDIC_STRUCTURE         = ' '
+             RETFIELD               = 'EMP_ID'
+*            PVALKEY                = ' '
+            DYNPPROG               = SY-REPID
+            DYNPNR                 = SY-DYNNR
+            DYNPROFIELD            = 'ZEMPLOYEE_TABLE-EMP_ID'
+*            STEPL                  = 0
+*            WINDOW_TITLE           =
+*            VALUE                  = ' '
+            VALUE_ORG              = 'S'
+*            MULTIPLE_CHOICE        = ' '
+*            DISPLAY                = ' '
+*            CALLBACK_PROGRAM       = ' '
+*            CALLBACK_FORM          = ' '
+*            CALLBACK_METHOD        =
+*            MARK_TAB               =
+*          IMPORTING
+*            USER_RESET             =
+           TABLES
+             VALUE_TAB              = IT_EMPI1
+*            FIELD_TAB              =
+*            RETURN_TAB             =
+*            DYNPFLD_MAPPING        =
+          EXCEPTIONS
+            PARAMETER_ERROR        = 1
+            NO_VALUES_FOUND        = 2
+            OTHERS                 = 3
+                   .
+         IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+         ENDIF.
+
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  F1_HELP1  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE F1_HELP1 INPUT.
+  CALL FUNCTION 'HELP_OBJECT_SHOW'
+    EXPORTING
+      DOKCLASS                            = 'TX'
+*     DOKLANGU                            = SY-LANGU
+      DOKNAME                             = 'ZEMPLOYEE_DATA1'
+*     DOKTITLE                            = ' '
+*     CALLED_BY_PROGRAM                   = ' '
+*     CALLED_BY_DYNP                      = ' '
+*     CALLED_FOR_TAB                      = ' '
+*     CALLED_FOR_FIELD                    = ' '
+*     CALLED_FOR_TAB_FLD_BTCH_INPUT       = ' '
+*     MSG_VAR_1                           = ' '
+*     MSG_VAR_2                           = ' '
+*     MSG_VAR_3                           = ' '
+*     MSG_VAR_4                           = ' '
+*     CALLED_BY_CUAPROG                   = ' '
+*     CALLED_BY_CUASTAT                   =
+*     SHORT_TEXT                          = ' '
+*     CLASSIC_SAPSCRIPT                   = ' '
+*     MES_PROGRAM_NAME                    = ' '
+*     MES_INCLUDE_NAME                    = ' '
+*     MES_LINE_NUMBER                     =
+*     MES_EXCEPTION                       = ' '
+*   TABLES
+*     LINKS                               =
+*   EXCEPTIONS
+*     OBJECT_NOT_FOUND                    = 1
+*     SAPSCRIPT_ERROR                     = 2
+*     OTHERS                              = 3
+            .
+  IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+ENDMODULE.
+
+*&SPWIZARD: DECLARATION OF TABLECONTROL 'ZELI_CONTROL_03' ITSELF
+CONTROLS: ZELI_CONTROL_03 TYPE TABLEVIEW USING SCREEN 0100.
+
+*&SPWIZARD: LINES OF TABLECONTROL 'ZELI_CONTROL_03'
+DATA:     G_ZELI_CONTROL_03_LINES  LIKE SY-LOOPC.
+
+DATA:     OK_CODE LIKE SY-UCOMM.
+
+*&SPWIZARD: OUTPUT MODULE FOR TC 'ZELI_CONTROL_03'. DO NOT CHANGE THIS L
+*&SPWIZARD: UPDATE LINES FOR EQUIVALENT SCROLLBAR
+MODULE ZELI_CONTROL_03_CHANGE_TC_ATTR OUTPUT.
+  DESCRIBE TABLE IT_DEPT3 LINES ZELI_CONTROL_03-lines.
+ENDMODULE.
+
+*&SPWIZARD: OUTPUT MODULE FOR TC 'ZELI_CONTROL_03'. DO NOT CHANGE THIS L
+*&SPWIZARD: GET LINES OF TABLECONTROL
+MODULE ZELI_CONTROL_03_GET_LINES OUTPUT.
+  G_ZELI_CONTROL_03_LINES = SY-LOOPC.
+ENDMODULE.
+
+*&SPWIZARD: INPUT MODULE FOR TC 'ZELI_CONTROL_03'. DO NOT CHANGE THIS LI
+*&SPWIZARD: PROCESS USER COMMAND
+MODULE ZELI_CONTROL_03_USER_COMMAND INPUT.
+  OK_CODE = SY-UCOMM.
+  PERFORM USER_OK_TC USING    'ZELI_CONTROL_03'
+                              'IT_DEPT3'
+                              ' '
+                     CHANGING OK_CODE.
+  SY-UCOMM = OK_CODE.
+ENDMODULE.
+
+*----------------------------------------------------------------------*
+*   INCLUDE TABLECONTROL_FORMS                                         *
+*----------------------------------------------------------------------*
+
+*&---------------------------------------------------------------------*
+*&      Form  USER_OK_TC                                               *
+*&---------------------------------------------------------------------*
+ FORM USER_OK_TC USING    P_TC_NAME TYPE DYNFNAM
+                          P_TABLE_NAME
+                          P_MARK_NAME
+                 CHANGING P_OK      LIKE SY-UCOMM.
+
+*&SPWIZARD: BEGIN OF LOCAL DATA----------------------------------------*
+   DATA: L_OK              TYPE SY-UCOMM,
+         L_OFFSET          TYPE I.
+*&SPWIZARD: END OF LOCAL DATA------------------------------------------*
+
+*&SPWIZARD: Table control specific operations                          *
+*&SPWIZARD: evaluate TC name and operations                            *
+   SEARCH P_OK FOR P_TC_NAME.
+   IF SY-SUBRC <> 0.
+     EXIT.
+   ENDIF.
+   L_OFFSET = STRLEN( P_TC_NAME ) + 1.
+   L_OK = P_OK+L_OFFSET.
+*&SPWIZARD: execute general and TC specific operations                 *
+   CASE L_OK.
+     WHEN 'INSR'.                      "insert row
+       PERFORM FCODE_INSERT_ROW USING    P_TC_NAME
+                                         P_TABLE_NAME.
+       CLEAR P_OK.
+
+     WHEN 'DELE'.                      "delete row
+       PERFORM FCODE_DELETE_ROW USING    P_TC_NAME
+                                         P_TABLE_NAME
+                                         P_MARK_NAME.
+       CLEAR P_OK.
+
+     WHEN 'P--' OR                     "top of list
+          'P-'  OR                     "previous page
+          'P+'  OR                     "next page
+          'P++'.                       "bottom of list
+       PERFORM COMPUTE_SCROLLING_IN_TC USING P_TC_NAME
+                                             L_OK.
+       CLEAR P_OK.
+
+     WHEN 'MARK'.                      "mark all filled lines
+       PERFORM FCODE_TC_MARK_LINES USING P_TC_NAME
+                                         P_TABLE_NAME
+                                         P_MARK_NAME   .
+       CLEAR P_OK.
+
+     WHEN 'DMRK'.                      "demark all filled lines
+       PERFORM FCODE_TC_DEMARK_LINES USING P_TC_NAME
+                                           P_TABLE_NAME
+                                           P_MARK_NAME .
+       CLEAR P_OK.
+   ENDCASE.
+
+ ENDFORM.                              " USER_OK_TC
+
+*&---------------------------------------------------------------------*
+*&      Form  FCODE_INSERT_ROW                                         *
+*&---------------------------------------------------------------------*
+ FORM fcode_insert_row
+               USING    P_TC_NAME           TYPE DYNFNAM
+                        P_TABLE_NAME             .
+
+   DATA L_LINES_NAME       LIKE FELD-NAME.
+   DATA L_SELLINE          LIKE SY-STEPL.
+   DATA L_LASTLINE         TYPE I.
+   DATA L_LINE             TYPE I.
+   DATA L_TABLE_NAME       LIKE FELD-NAME.
+   FIELD-SYMBOLS <TC>                 TYPE CXTAB_CONTROL.
+   FIELD-SYMBOLS <TABLE>              TYPE STANDARD TABLE.
+   FIELD-SYMBOLS <LINES>              TYPE I.
+
+   ASSIGN (P_TC_NAME) TO <TC>.
+
+   CONCATENATE P_TABLE_NAME '[]' INTO L_TABLE_NAME.
+   ASSIGN (L_TABLE_NAME) TO <TABLE>.
+
+   CONCATENATE 'G_' P_TC_NAME '_LINES' INTO L_LINES_NAME.
+   ASSIGN (L_LINES_NAME) TO <LINES>.
+
+   GET CURSOR LINE L_SELLINE.
+   IF SY-SUBRC <> 0.
+     L_SELLINE = <TC>-LINES + 1.
+     IF L_SELLINE > <LINES>.
+       <TC>-TOP_LINE = L_SELLINE - <LINES> + 1 .
+     ELSE.
+       <TC>-TOP_LINE = 1.
+     ENDIF.
+   ELSE.
+     L_SELLINE = <TC>-TOP_LINE + L_SELLINE - 1.
+     L_LASTLINE = <TC>-TOP_LINE + <LINES> - 1.
+   ENDIF.
+
+   L_LINE = L_SELLINE - <TC>-TOP_LINE + 1.
+
+   INSERT INITIAL LINE INTO <TABLE> INDEX L_SELLINE.
+   <TC>-LINES = <TC>-LINES + 1.
+   SET CURSOR 1 L_LINE.
+
+ ENDFORM.
+
+*&---------------------------------------------------------------------*
+*&      Form  FCODE_DELETE_ROW                                         *
+*&---------------------------------------------------------------------*
+ FORM fcode_delete_row
+               USING    P_TC_NAME           TYPE DYNFNAM
+                        P_TABLE_NAME
+                        P_MARK_NAME   .
+
+   DATA L_TABLE_NAME       LIKE FELD-NAME.
+
+   FIELD-SYMBOLS <TC>         TYPE cxtab_control.
+   FIELD-SYMBOLS <TABLE>      TYPE STANDARD TABLE.
+   FIELD-SYMBOLS <WA>.
+   FIELD-SYMBOLS <MARK_FIELD>.
+
+   ASSIGN (P_TC_NAME) TO <TC>.
+
+   CONCATENATE P_TABLE_NAME '[]' INTO L_TABLE_NAME.
+   ASSIGN (L_TABLE_NAME) TO <TABLE>.
+
+   DESCRIBE TABLE <TABLE> LINES <TC>-LINES.
+
+   LOOP AT <TABLE> ASSIGNING <WA>.
+     ASSIGN COMPONENT P_MARK_NAME OF STRUCTURE <WA> TO <MARK_FIELD>.
+     IF <MARK_FIELD> = 'X'.
+       DELETE <TABLE> INDEX SYST-TABIX.
+       IF SY-SUBRC = 0.
+         <TC>-LINES = <TC>-LINES - 1.
+       ENDIF.
+     ENDIF.
+   ENDLOOP.
+
+ ENDFORM.
+
+*&---------------------------------------------------------------------*
+*&      Form  COMPUTE_SCROLLING_IN_TC
+*&---------------------------------------------------------------------*
+ FORM COMPUTE_SCROLLING_IN_TC USING    P_TC_NAME
+                                       P_OK.
+
+   DATA L_TC_NEW_TOP_LINE     TYPE I.
+   DATA L_TC_NAME             LIKE FELD-NAME.
+   DATA L_TC_LINES_NAME       LIKE FELD-NAME.
+   DATA L_TC_FIELD_NAME       LIKE FELD-NAME.
+
+   FIELD-SYMBOLS <TC>         TYPE cxtab_control.
+   FIELD-SYMBOLS <LINES>      TYPE I.
+
+   ASSIGN (P_TC_NAME) TO <TC>.
+   CONCATENATE 'G_' P_TC_NAME '_LINES' INTO L_TC_LINES_NAME.
+   ASSIGN (L_TC_LINES_NAME) TO <LINES>.
+
+   IF <TC>-LINES = 0.
+     L_TC_NEW_TOP_LINE = 1.
+   ELSE.
+     CALL FUNCTION 'SCROLLING_IN_TABLE'
+          EXPORTING
+               ENTRY_ACT             = <TC>-TOP_LINE
+               ENTRY_FROM            = 1
+               ENTRY_TO              = <TC>-LINES
+               LAST_PAGE_FULL        = 'X'
+               LOOPS                 = <LINES>
+               OK_CODE               = P_OK
+               OVERLAPPING           = 'X'
+          IMPORTING
+               ENTRY_NEW             = L_TC_NEW_TOP_LINE
+          EXCEPTIONS
+               OTHERS                = 0.
+   ENDIF.
+
+   GET CURSOR FIELD L_TC_FIELD_NAME
+              AREA  L_TC_NAME.
+
+   IF SYST-SUBRC = 0.
+     IF L_TC_NAME = P_TC_NAME.
+       SET CURSOR FIELD L_TC_FIELD_NAME LINE 1.
+     ENDIF.
+   ENDIF.
+
+   <TC>-TOP_LINE = L_TC_NEW_TOP_LINE.
+
+ ENDFORM.
+
+*&---------------------------------------------------------------------*
+*&      Form  FCODE_TC_MARK_LINES
+*&---------------------------------------------------------------------*
+FORM FCODE_TC_MARK_LINES USING P_TC_NAME
+                               P_TABLE_NAME
+                               P_MARK_NAME.
+
+  DATA L_TABLE_NAME       LIKE FELD-NAME.
+
+  FIELD-SYMBOLS <TC>         TYPE cxtab_control.
+  FIELD-SYMBOLS <TABLE>      TYPE STANDARD TABLE.
+  FIELD-SYMBOLS <WA>.
+  FIELD-SYMBOLS <MARK_FIELD>.
+
+  ASSIGN (P_TC_NAME) TO <TC>.
+
+   CONCATENATE P_TABLE_NAME '[]' INTO L_TABLE_NAME.
+   ASSIGN (L_TABLE_NAME) TO <TABLE>.
+
+  LOOP AT <TABLE> ASSIGNING <WA>.
+     ASSIGN COMPONENT P_MARK_NAME OF STRUCTURE <WA> TO <MARK_FIELD>.
+     <MARK_FIELD> = 'X'.
+  ENDLOOP.
+ENDFORM.
+
+*&---------------------------------------------------------------------*
+*&      Form  FCODE_TC_DEMARK_LINES
+*&---------------------------------------------------------------------*
+FORM FCODE_TC_DEMARK_LINES USING P_TC_NAME
+                                 P_TABLE_NAME
+                                 P_MARK_NAME .
+
+  DATA L_TABLE_NAME       LIKE FELD-NAME.
+
+  FIELD-SYMBOLS <TC>         TYPE cxtab_control.
+  FIELD-SYMBOLS <TABLE>      TYPE STANDARD TABLE.
+  FIELD-SYMBOLS <WA>.
+  FIELD-SYMBOLS <MARK_FIELD>.
+
+  ASSIGN (P_TC_NAME) TO <TC>.
+
+   CONCATENATE P_TABLE_NAME '[]' INTO L_TABLE_NAME.
+   ASSIGN (L_TABLE_NAME) TO <TABLE>.
+
+  LOOP AT <TABLE> ASSIGNING <WA>.
+     ASSIGN COMPONENT P_MARK_NAME OF STRUCTURE <WA> TO <MARK_FIELD>.
+     <MARK_FIELD> = SPACE.
+  ENDLOOP.
+ENDFORM.
